@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://mybatis.org/schema/mybatis-spring
+		http://mybatis.org/schema/mybatis-spring.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<context:component-scan base-package="taein.cinema"/>
+	<mvc:annotation-driven/>
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="java:comp/env/jdbc/cinema" />
+		<property name="resourceRef" value="true" />
+	</bean>
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation"
+			value="classpath:taein/cinema/config/dao/SqlMapConfig.xml"/>
+		<property name="mapperLocations">
+			<array>
+				<value>classpath:taein/cinema/**/dao/mapper/**/*.xml</value>
+			</array>
+		</property>
+	</bean>
+	<mybatis:scan base-package="taein.cinema.**.dao.mapper" />
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	<mybatis:scan base-package="taein.cinema.**.dao.mapper"/>
+	
+	<aop:aspectj-autoproxy/>
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"/>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="username" value="youlinchul"/>
+		<property name="password" value="aqiziyfhrvjmamrp"/>
+		<property name="javaMailProperties">
+		<props>
+			<prop key="mail.smtp.starttls.enable">true</prop>
+			<prop key="mail.smtp.host">smtp.gmail.com</prop>
+			<prop key="mail.smtp.port">465</prop>
+			<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+			<prop key="mail.smtp.socketFactory.fallback">false</prop>
+			<prop key="mail.smtp.auth">true</prop>
+		</props>
+		</property>
+	</bean>
+	
+	<bean id="loginInterceptor" class="taein.cinema.interceptor.LoginInterceptor"></bean>
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/admin/**"/>
+			<ref bean="loginInterceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
+</beans>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="taein.cinema.user.login.dao.mapper.LoginMapper">
+	<select id = "getUsers" resultType="user">
+		select u_num userNum, u_id userId, u_pw userPw, u_n userName, 
+				u_gen userGen, u_db userDate, 
+          		u_p_t_num userPTNum, u_front_num userPFrontNum, u_back_num userPBackNum,
+          		u_email userEmail, u_point userPoint, u_mailing userMailing, u_sms userSms
+    	from users
+    	order by userNum
+	</select>
+	
+	<insert id = "addUser" parameterType="user">
+		insert into users values(#{userId}, #{userPw}, #{userName}, 
+					#{userGen}, #{userDate}, 
+					#{userPTNum}, #{userPFrontNum}, #{userPBackNum},
+					#{userEmail}, 1000, user_seq.nextval, #{userMailing}, #{userSms})
+	</insert>
+</mapper>
